@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  react-native-android:
+    build: .
+    container_name: rn-android
+    working_dir: /app
+    volumes:
+      - .:/app
+      - gradle-cache:/root/.gradle
+      - yarn-cache:/usr/local/share/.cache/yarn
+    command: bash -c "cd android && ./gradlew assembleDebug"
+
+volumes:
+  gradle-cache:
+  yarn-cache:
