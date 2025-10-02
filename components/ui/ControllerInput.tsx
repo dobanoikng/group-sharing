@@ -1,7 +1,6 @@
 import React from "react";
 import { Control, Controller, FieldValues, Path } from "react-hook-form";
-import { Text } from "react-native";
-import TextInput from "./TextInput";
+import { Text, TextInput, View } from "react-native";
 
 interface ControllerInputProps<T extends FieldValues> {
   control: Control<T>;
@@ -21,22 +20,17 @@ export default function ControllerInput<T extends FieldValues>({
       control={control}
       name={name}
       render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
-        <>
+        <View>
           <TextInput
-            style={{
-              borderWidth: 1,
-              borderColor: error ? "red" : "#ccc",
-              padding: 8,
-              marginBottom: 4,
-            }}
+            className={"h-9 rounded-md border px-3 py-1 text-base shadow-xs "}
             placeholder={placeholder}
             onBlur={onBlur}
             onChangeText={onChange}
             value={value}
             secureTextEntry={secureTextEntry}
           />
-          {error && <Text style={{ color: "red" }}>{error.message}</Text>}
-        </>
+          {error && <Text className="text-red-600">{error.message}</Text>}
+        </View>
       )}
     />
   );

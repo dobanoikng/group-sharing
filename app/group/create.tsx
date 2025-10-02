@@ -1,7 +1,7 @@
 import ControllerInput from "@/components/ui/ControllerInput";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Button, View } from "react-native";
+import { Button, StyleSheet, View } from "react-native";
 import { z } from "zod";
 
 
@@ -25,9 +25,23 @@ export default function Create() {
     console.log("Form Data:", data);
   };
 
-  return <View>
-    <ControllerInput control={control} name="name" placeholder="Group Name" />
-    <ControllerInput control={control} name="description" placeholder="Description" />
+  return <View style={styles.wrapper}>
+    <View style={styles.groupInput}>
+      <ControllerInput control={control} name="name" placeholder="Group Name" />
+    </View>
+    <View style={styles.groupInput}>
+      <ControllerInput control={control} name="description" placeholder="Description" />
+    </View>
     <Button title="Tạo nhóm" onPress={handleSubmit(onSubmit)} />
   </View>
 }
+
+const styles = StyleSheet.create({
+  wrapper: {
+    marginTop: 24,
+    padding: 20
+  },
+  groupInput: {
+    marginBottom: 10
+  }
+})
