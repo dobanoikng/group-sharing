@@ -1,35 +1,29 @@
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Tabs } from 'expo-router';
 import React from 'react';
-
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
+import { useTranslation } from 'react-i18next';
+const Layout = () => {
+  const { t } = useTranslation();
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
+    <Tabs>
       <Tabs.Screen
-        name="index"
+        name="group"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          headerShown: false,
+          title: t('tab.group'),
+          tabBarIcon: ({ size, color }) => <FontAwesome name="group" size={size} color={color} />,
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="users"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          headerShown: false,
+          title: t('tab.user'),
+          tabBarIcon: ({ size, color }) => <FontAwesome name="user" size={size} color={color} />,
         }}
       />
     </Tabs>
   );
-}
+};
+
+export default Layout;
