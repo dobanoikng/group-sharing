@@ -4,6 +4,9 @@
     "user": "người dùng"
   },
   "button": {
-    "create": "tạo"
+    "create": "Tạo"
+  },
+  "group": {
+    "modal-title": "Thêm nhóm mới"
   }
 }
