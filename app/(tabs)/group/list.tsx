@@ -3,9 +3,10 @@ import StringAvatar from '@/components/ui/StringAvatar';
 import { useServiceLoader } from '@/hooks/UseServiceLoader';
 import { Group, groupService } from '@/services/GroupServices';
 import { groupMemberServices } from '@/services/UserServices';
+import { formatDate } from '@/utils';
 import { MaterialIcons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button, Card, Divider, List, Modal, Text } from '@ui-kitten/components';
+import { Button, Card, List, Modal, Text } from '@ui-kitten/components';
 import { useRouter } from 'expo-router';
 import { t } from 'i18next';
 import { useEffect, useState } from 'react';
@@ -94,16 +95,64 @@ export default function ListGroup() {
   const renderItem = ({ item }: { item: GroupList }) => (
     <Card
       header={(headerProps) => (
-        <View {...headerProps}>
-          <Text category="h3">{item.name}</Text>
+        <View {...headerProps} style={[
+          headerProps?.style,
+          styles.card_header
+        ]}>
+          <View>
+            <Text category="h6">{item.name}</Text>
+            <Text category="c2" appearance='hint'>{formatDate(item.created_at)}</Text>
+          </View>
+          <Text category="label" style={{
+            fontSize: 22
+          }}>
+            $180
+          </Text>
         </View>
       )}
+      style={{
+        marginBottom: 12,
+        borderRadius: 24,
+      }}
+      onPress={() => router.navigate(`/(tabs)/group/${item.id}`)}
     >
-      {item.group_members.map((grMember) => (
-        <View key={grMember.user_id}>
-          <StringAvatar text={grMember.profiles.full_name} />
+      <View style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+      }}>
+        <View style={{
+          flexDirection: 'row',
+          gap: 5
+        }}>
+          {item.group_members.slice(0, 3).map((grMember) => (
+            <View key={grMember.user_id}>
+              <StringAvatar text={grMember.profiles.full_name} />
+            </View>
+          ))}
+          {item.group_members.length > 3 && <View style={{
+            width: 32,
+            height: 32,
+            borderRadius: 16,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: '#eeeaeaff',
+          }}>
+            <Text style={{
+              color: 'green'
+            }}>
+              +{item.group_members.length - 3}
+            </Text>
+          </View>}
         </View>
-      ))}
+        <View style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}>
+          <Text category="c1" appearance='hint'>Sharing: </Text>
+          <Text category="p1">{item.group_members.length} Persons</Text>
+        </View>
+      </View>
     </Card>
   );
 
@@ -113,33 +162,34 @@ export default function ListGroup() {
 
   return (
     <SafeAreaView style={styles.wrapper}>
-      <View style={styles.container}>
-        <Text>Nhóm</Text>
-        <MaterialIcons name="add-circle-outline" size={36} onPress={() => setVisible(true)} />
-      </View>
-      <List
-        style={styles.list}
-        data={groups}
-        ItemSeparatorComponent={Divider}
-        renderItem={renderItem}
-      />
-      <Modal visible={visible} backdropStyle={styles.backdrop} animationType="slide">
-        <Card disabled={true} style={styles.card}>
-          <View>
-            <Text style={styles.title}>{t('group.modal-title')}</Text>
-          </View>
-          <View style={styles.input}>
-            <ControllerInput control={control} name="name" placeholder="Name" />
-          </View>
-          <View style={styles.input}>
-            <ControllerInput control={control} name="description" placeholder="Description" />
-          </View>
+      <View style={styles.body}>
+        <View style={styles.container}>
+          <Text>{t('group.title')}</Text>
+          <MaterialIcons name="add-circle-outline" size={24} onPress={() => setVisible(true)} />
+        </View>
+        <List
+          style={styles.list}
+          data={groups}
+          renderItem={renderItem}
+        />
+        <Modal visible={visible} backdropStyle={styles.backdrop} animationType="slide">
+          <Card disabled={true} style={styles.card}>
+            <View>
+              <Text style={styles.title}>{t('group.modal-title')}</Text>
+            </View>
+            <View style={styles.input}>
+              <ControllerInput control={control} name="name" placeholder="Name" />
+            </View>
+            <View style={styles.input}>
+              <ControllerInput control={control} name="description" placeholder="Description" />
+            </View>
 
-          <Button disabled={creatingGroup || creatingGroupMember} onPress={handleSubmit(onSubmit)}>
-            {t('button.create')}
-          </Button>
-        </Card>
-      </Modal>
+            <Button disabled={creatingGroup || creatingGroupMember} onPress={handleSubmit(onSubmit)}>
+              {t('button.create')}
+            </Button>
+          </Card>
+        </Modal>
+      </View>
     </SafeAreaView>
   );
 }
@@ -148,14 +198,14 @@ const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
   },
+  body: {
+    padding: 12
+  },
   container: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
+    paddingVertical: 6,
     justifyContent: 'space-between',
     alignItems: 'center',
     flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderColor: 'gray',
   },
   backdrop: {
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -172,5 +222,12 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     textAlign: 'center',
   },
-  list: {},
+  list: {
+    backgroundColor: 'transparent',
+  },
+  card_header: {
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexDirection: 'row',
+  }
 });

@@ -3,15 +3,16 @@ import { supabase } from '@/libs/supabase'
 const TABLE_NAME = 'groups'
 
 export interface Group {
-  id?: number
+  id: number
   name: string
   description?: string
-  created_by?: string
+  created_by: string
+  created_at: string
 }
 
 export const groupService = {
   // 📌 Thêm todo mới
-  async add(group: Omit<Group, 'id'>) {
+  async add(group: Omit<Group, 'id' | 'created_at'>) {
     const { data, error } = await supabase
       .from(TABLE_NAME)
       .insert([group])

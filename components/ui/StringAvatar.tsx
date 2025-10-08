@@ -16,7 +16,7 @@ type IProps = {
   shape?: 'round' | 'rounded';
   style?: StyleProp<ViewStyle>;
 };
-const StringAvatar = ({ text, size = 'medium', shape = 'round', style }: IProps) => {
+const StringAvatar = ({ text, size = 'small', shape = 'round', style }: IProps) => {
   // Determine size based on UI Kitten's Avatar sizes
 
   const avatarSize = avatarSizes[size] || avatarSizes.medium;
@@ -37,7 +37,15 @@ const StringAvatar = ({ text, size = 'medium', shape = 'round', style }: IProps)
         style,
       ]}
     >
-      <Text category="s1" style={styles.stringAvatarText}>
+      <Text category="c1" style={[
+        styles.stringAvatarText,
+        {
+          fontSize: avatarSize * 0.5, // tuỳ chỉnh cỡ chữ
+          lineHeight: avatarSize * 0.5, // giữ cho không bị lệch dọc
+          textAlign: 'center',
+          textAlignVertical: 'center', // chỉ hoạt động tốt trên Android
+        },
+      ]}>
         {text.charAt(0).toUpperCase()} {/* Display first letter */}
       </Text>
     </View>
@@ -48,11 +56,13 @@ const styles = StyleSheet.create({
   stringAvatarContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#A0A0A0', // Example background color
+    backgroundColor: '#A0A0A0',
   },
   stringAvatarText: {
-    color: '#FFFFFF', // Example text color
+    color: '#FFFFFF',
     fontWeight: 'bold',
+    includeFontPadding: false, // loại bỏ padding mặc định Android
+    textAlign: 'center',
   },
 });
 
