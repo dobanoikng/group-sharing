@@ -1,14 +1,49 @@
 import '@/i18n';
 import * as eva from '@eva-design/eva';
 import { ApplicationProvider } from '@ui-kitten/components';
-import { Stack } from 'expo-router';
+import { SplashScreen, Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
+
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+
+SplashScreen.preventAutoHideAsync()
+
+const InitialLayout = () => {
+  const { session, loading } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (loading) return;
+
+    const inTabsGroup = segments[0] === '(tabs)';
+
+    if (session && !inTabsGroup) {
+      router.navigate('/(tabs)/group/list');
+    } else if (!session) {
+      router.replace('/login');
+    }
+  }, [session, loading, segments, router]);
+
+  if (!loading) {
+    SplashScreen.hideAsync()
+  }
+
+  return (
+    <Stack>
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="login" options={{ headerShown: false }} />
+    </Stack>
+  );
+};
+
 export default function RootLayout() {
   return (
     <ApplicationProvider {...eva} theme={eva.light}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      </Stack>
+      <AuthProvider>
+        <InitialLayout />
+      </AuthProvider>
       <StatusBar style="auto" />
     </ApplicationProvider>
   );

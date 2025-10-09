@@ -1,8 +1,8 @@
 import ControllerInput from '@/components/form/ControllerInput';
 import StringAvatar from '@/components/ui/StringAvatar';
 import { useServiceLoader } from '@/hooks/UseServiceLoader';
+import { groupMemberServices } from '@/services/GroupMemberServices';
 import { Group, groupService } from '@/services/GroupServices';
-import { groupMemberServices } from '@/services/UserServices';
 import { formatDate } from '@/utils';
 import { MaterialIcons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -51,16 +51,6 @@ export default function ListGroup() {
     },
   });
   const onSubmit = async ({ name, description }: GroupFormValues) => {
-    // const {
-    //   data: { session },
-    //   error,
-    // } = await supabase.auth.signInWithPassword({
-    //   email: 'admin@group.com',
-    //   password: '123456',
-    // });
-    // if (error) Alert.alert(error.message + 'errr');
-    // if (!session) Alert.alert('Please check your inbox for email verification!');
-    // console.log({ session });
     try {
       const group = await createGroup({
         name,
