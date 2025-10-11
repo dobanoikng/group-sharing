@@ -6,8 +6,10 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { ToastProvider } from '@/contexts/ToastContext';
+import { KeyboardAvoidingView, Platform } from 'react-native';
 
-SplashScreen.preventAutoHideAsync()
+SplashScreen.preventAutoHideAsync();
 
 const InitialLayout = () => {
   const { session, loading } = useAuth();
@@ -27,7 +29,7 @@ const InitialLayout = () => {
   }, [session, loading, segments, router]);
 
   if (!loading) {
-    SplashScreen.hideAsync()
+    SplashScreen.hideAsync();
   }
 
   return (
@@ -42,7 +44,15 @@ export default function RootLayout() {
   return (
     <ApplicationProvider {...eva} theme={eva.light}>
       <AuthProvider>
-        <InitialLayout />
+        <ToastProvider>
+          <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0} // tránh đè header
+          >
+            <InitialLayout />
+          </KeyboardAvoidingView>
+        </ToastProvider>
       </AuthProvider>
       <StatusBar style="auto" />
     </ApplicationProvider>

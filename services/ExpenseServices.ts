@@ -1,10 +1,8 @@
 import { supabase } from "@/libs/supabase"
+import { IProfile } from "./UserServices"
 
 const TABLE_NAME = 'expenses'
-type IProfile = {
-  id: string,
-  full_name: string
-}
+
 export type IExpense = {
   id: string,
   group_id: string,
@@ -17,6 +15,8 @@ export type IExpense = {
   expense_splits: { amount: number, profiles: IProfile }[]
 }
 
+type IExpenseCreate = Omit<IExpense, 'id' | 'created_at' | 'profiles' | 'expense_splits'>
+
 export const expenseServices = {
   async getAllFromGroup(groupId: string) {
     const { data, error } = await supabase
@@ -26,5 +26,13 @@ export const expenseServices = {
       .order('id', { ascending: true })
     if (error) throw error
     return data
+  },
+  async add(expense: IExpenseCreate) {
+    const { data, error } = await supabase
+      .from(TABLE_NAME)
+      .insert([expense])
+      .select('*')
+    if (error) throw error
+    return data[0]
   },
 }

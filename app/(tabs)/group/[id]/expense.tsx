@@ -1,6 +1,8 @@
 import { useServiceLoader } from '@/hooks/UseServiceLoader';
 import { expenseServices, IExpense } from '@/services/ExpenseServices';
-import { Card, List, Text } from '@ui-kitten/components';
+import { Button, Card, List, Text } from '@ui-kitten/components';
+import { useRouter } from 'expo-router';
+import { t } from 'i18next';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 type IProps = {
@@ -8,6 +10,7 @@ type IProps = {
 };
 
 const Expense = ({ groupId }: IProps) => {
+  const router = useRouter();
   const [expenses, setExpenses] = useState<IExpense[]>([]);
 
   const { call: getListExpense, loading } = useServiceLoader(expenseServices.getAllFromGroup);
@@ -26,8 +29,14 @@ const Expense = ({ groupId }: IProps) => {
   }, [groupId]);
 
   return (
-    <View>
+    <View style={styles.container}>
       <List style={{ backgroundColor: 'transparent' }} data={expenses} renderItem={renderItem} />
+      <Button
+        onPress={() => router.navigate(`/(tabs)/group/${groupId}/create-expense`)}
+        style={styles.fixedButton}
+      >
+        {t('add-expense')}
+      </Button>
     </View>
   );
 };
@@ -59,6 +68,7 @@ const renderItem = ({ item }: { item: IExpense }) => {
       // onPress={() => router.navigate(`/(tabs)/group/${item.id}`)}
       style={{
         borderRadius: 12,
+        marginBottom: 10,
       }}
     >
       <View
@@ -76,4 +86,11 @@ const renderItem = ({ item }: { item: IExpense }) => {
   );
 };
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+    justifyContent: 'space-between',
+  },
+  fixedButton: { position: 'absolute', bottom: 20, left: 20, right: 20, borderRadius: 10 },
+});

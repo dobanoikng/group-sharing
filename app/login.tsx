@@ -1,6 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Layout, Text } from '@ui-kitten/components';
-import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { StyleSheet, View } from 'react-native';
@@ -10,14 +9,13 @@ import ControllerInput from '@/components/form/ControllerInput';
 import { supabase } from '@/libs/supabase';
 
 const LoginSchema = z.object({
-  email: z.email('Invalid email address'),
+  email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
 type LoginFormData = z.infer<typeof LoginSchema>;
 
 export default function LoginScreen() {
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -52,11 +50,7 @@ export default function LoginScreen() {
         Login
       </Text>
       <View style={styles.form}>
-        <ControllerInput<LoginFormData>
-          control={control}
-          name="email"
-          placeholder="Email"
-        />
+        <ControllerInput<LoginFormData> control={control} name="email" placeholder="Email" />
         <ControllerInput<LoginFormData>
           control={control}
           name="password"

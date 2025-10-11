@@ -1,8 +1,7 @@
 import { useServiceLoader } from '@/hooks/UseServiceLoader';
 import { Group, groupService } from '@/services/GroupServices';
-import { Button, Layout, Spinner, Tab, TabView } from '@ui-kitten/components';
+import { Layout, Spinner, Tab, TabView } from '@ui-kitten/components';
 import { useLocalSearchParams } from 'expo-router';
-import { t } from 'i18next';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Expense from './expense';
@@ -18,7 +17,6 @@ export default function DetailGroup() {
   const onGetDetailGroup = async () => {
     try {
       const data = await getDetail(id as string);
-
       setGroup(data);
     } catch (error) {
       console.error(error);
@@ -39,16 +37,19 @@ export default function DetailGroup() {
   if (group)
     return (
       <View style={styles.container}>
-        <TabView selectedIndex={selectedIndex} onSelect={(index) => setSelectedIndex(index)}>
+        <TabView
+          style={{ flex: 1 }}
+          selectedIndex={selectedIndex}
+          onSelect={(index) => setSelectedIndex(index)}
+        >
           <Tab title="Expenses">
             <Layout style={styles.tabContainer}>
               <Expense groupId={id as string} />
-              <Button style={styles.fixedButton}>{t('add-expense')}</Button>
             </Layout>
           </Tab>
           <Tab title="Members">
             <Layout style={styles.tabContainer}>
-              <Members />
+              <Members groupId={id as string} />
             </Layout>
           </Tab>
           <Tab title="Summary">
@@ -68,7 +69,6 @@ export default function DetailGroup() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
     flex: 1,
   },
   center: {
@@ -78,8 +78,5 @@ const styles = StyleSheet.create({
   },
   tabContainer: {
     flex: 1,
-    backgroundColor: 'transparent',
-    paddingVertical: 10,
   },
-  fixedButton: { position: 'absolute', bottom: 20, left: 20, right: 20, borderRadius: 10 },
 });

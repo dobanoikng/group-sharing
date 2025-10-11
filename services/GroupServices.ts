@@ -26,7 +26,7 @@ export const groupService = {
     const { data, error } = await supabase
       .from(TABLE_NAME)
       .select(`*, group_members(*, profiles(*))`)
-      .order('id', { ascending: true })
+      .order('created_at', { ascending: true })
     if (error) throw error
     return data
   },

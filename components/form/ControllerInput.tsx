@@ -1,13 +1,14 @@
 import { Input, Text } from '@ui-kitten/components';
 import React from 'react';
 import { Control, Controller, FieldValues, Path } from 'react-hook-form';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, TextInputProps, View } from 'react-native';
 
 interface ControllerInputProps<T extends FieldValues> {
   control: Control<T>;
   name: Path<T>;
   placeholder?: string;
   secureTextEntry?: boolean;
+  textInputProps?: TextInputProps;
 }
 
 export default function ControllerInput<T extends FieldValues>({
@@ -15,6 +16,7 @@ export default function ControllerInput<T extends FieldValues>({
   name,
   placeholder,
   secureTextEntry,
+  textInputProps,
 }: ControllerInputProps<T>) {
   return (
     <Controller
@@ -29,6 +31,8 @@ export default function ControllerInput<T extends FieldValues>({
             value={value}
             secureTextEntry={secureTextEntry}
             status={error ? 'danger' : 'info'}
+            autoCapitalize="none"
+            {...textInputProps}
           />
 
           {error && (
