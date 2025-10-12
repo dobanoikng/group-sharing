@@ -1,3 +1,4 @@
+import { useToast } from '@/contexts/ToastContext';
 import { useServiceLoader } from '@/hooks/UseServiceLoader';
 import { userServices } from '@/services/UserServices';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -23,7 +24,9 @@ type IProps = {
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
   onSuccess: CallableFunction;
 };
+
 const ModalAddUser = ({ visible, setVisible, onSuccess }: IProps) => {
+  const { showToast } = useToast();
   const { control, handleSubmit } = useForm<UserFormValues>({
     resolver: zodResolver(userSchema),
   });
@@ -35,24 +38,28 @@ const ModalAddUser = ({ visible, setVisible, onSuccess }: IProps) => {
       await createUser(data);
       onSuccess();
       control._reset();
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      if (error?.message) showToast(error.message, { type: 'error' });
     }
   };
   return (
     <Modal visible={visible} backdropStyle={styles.backdrop} animationType="slide">
       <Card disabled={true} style={styles.card}>
         <View>
-          <Text style={styles.title}>{t('user.modal-title')}</Text>
+          <Text style={styles.title}>{t('user-form.title')}</Text>
         </View>
         <View style={styles.input}>
-          <ControllerInput control={control} name="full_name" placeholder="Name" />
+          <ControllerInput control={control} name="full_name" placeholder={t('user-form.name')} />
         </View>
         <View style={styles.input}>
-          <ControllerInput control={control} name="email" placeholder="Email" />
+          <ControllerInput control={control} name="email" placeholder={t('user-form.email')} />
         </View>
         <View style={styles.input}>
-          <ControllerInput control={control} name="password" placeholder="Password" />
+          <ControllerInput
+            control={control}
+            name="password"
+            placeholder={t('user-form.password')}
+          />
         </View>
 
         <Button disabled={loading} onPress={handleSubmit(onSubmit)}>

@@ -1,3 +1,4 @@
+import { useToast } from '@/contexts/ToastContext';
 import { useServiceLoader } from '@/hooks/UseServiceLoader';
 import { expenseServices, IExpense } from '@/services/ExpenseServices';
 import { Button, Card, List, Text } from '@ui-kitten/components';
@@ -11,16 +12,62 @@ type IProps = {
 
 const Expense = ({ groupId }: IProps) => {
   const router = useRouter();
+  const { showToast } = useToast();
   const [expenses, setExpenses] = useState<IExpense[]>([]);
 
   const { call: getListExpense, loading } = useServiceLoader(expenseServices.getAllFromGroup);
+
+  const renderItem = ({ item }: { item: IExpense }) => {
+    return (
+      <Card
+        header={(headerProps) => (
+          <View {...headerProps}>
+            <View>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <Text category="h6">{item.title}</Text>
+                <Text category="h6">${item.amount}</Text>
+              </View>
+              <Text category="c2" appearance="hint">
+                {t('paid-by')}: {item.profiles.full_name}
+              </Text>
+            </View>
+          </View>
+        )}
+        onPress={() =>
+          router.navigate(`/(tabs)/group/${item.group_id}/edit-expense?expenseId=${item.id}`)
+        }
+        style={{
+          borderRadius: 12,
+          marginBottom: 10,
+        }}
+      >
+        <View
+          style={{
+            gap: 5,
+          }}
+        >
+          {item.expense_splits.map((p) => (
+            <Text category="c2" appearance="hint" key={p.profiles.id}>
+              {p.profiles.full_name}: ${p.amount}
+            </Text>
+          ))}
+        </View>
+      </Card>
+    );
+  };
 
   const onGetListExpenses = async () => {
     try {
       const data = await getListExpense(groupId);
       setExpenses(data);
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      if (error?.message) showToast(error.message, { type: 'error' });
     }
   };
 
@@ -42,49 +89,6 @@ const Expense = ({ groupId }: IProps) => {
 };
 
 export default Expense;
-
-const renderItem = ({ item }: { item: IExpense }) => {
-  return (
-    <Card
-      header={(headerProps) => (
-        <View {...headerProps}>
-          <View>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}
-            >
-              <Text category="h6">{item.title}</Text>
-              <Text category="h6">${item.amount}</Text>
-            </View>
-            <Text category="c2" appearance="hint">
-              Paid by {item.profiles.full_name}
-            </Text>
-          </View>
-        </View>
-      )}
-      // onPress={() => router.navigate(`/(tabs)/group/${item.id}`)}
-      style={{
-        borderRadius: 12,
-        marginBottom: 10,
-      }}
-    >
-      <View
-        style={{
-          gap: 5,
-        }}
-      >
-        {item.expense_splits.map((p) => (
-          <Text category="c2" appearance="hint" key={p.profiles.id}>
-            {p.profiles.full_name}: ${p.amount}
-          </Text>
-        ))}
-      </View>
-    </Card>
-  );
-};
 
 const styles = StyleSheet.create({
   container: {

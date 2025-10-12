@@ -1,8 +1,9 @@
 import ModalAddGroup from '@/components/modals/AddGroup';
 import StringAvatar from '@/components/ui/StringAvatar';
+import { useToast } from '@/contexts/ToastContext';
 import { useServiceLoader } from '@/hooks/UseServiceLoader';
 import { Group, groupService } from '@/services/GroupServices';
-import { formatDate } from '@/utils';
+import { formatDate, formatMoney } from '@/utils';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Card, List, Spinner, Text } from '@ui-kitten/components';
 import { useRouter } from 'expo-router';
@@ -21,20 +22,22 @@ type GroupMember = {
 };
 type GroupList = Group & {
   group_members: GroupMember[];
+  expenses: { amount: number }[];
 };
 
 export default function ListGroup() {
   const router = useRouter();
   const [visible, setVisible] = useState(false);
   const [groups, setGroups] = useState<GroupList[]>([]);
+  const { showToast } = useToast();
   const { loading: gettingAll, call: getAllGroup } = useServiceLoader(groupService.getAll);
 
   const onGetListGroup = async () => {
     try {
       const data = await getAllGroup();
       setGroups(data);
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      if (error?.message) showToast(error.message, { type: 'error' });
     }
   };
   const renderItem = ({ item }: { item: GroupList }) => (
@@ -53,7 +56,7 @@ export default function ListGroup() {
               fontSize: 22,
             }}
           >
-            $180
+            {formatMoney(item.expenses.reduce((acc, curr) => acc + curr.amount, 0))}
           </Text>
         </View>
       )}
@@ -109,9 +112,11 @@ export default function ListGroup() {
           }}
         >
           <Text category="c1" appearance="hint">
-            Sharing:{' '}
+            {t('member')}:{' '}
           </Text>
-          <Text category="p1">{item.group_members.length} Persons</Text>
+          <Text category="p1">
+            {item.group_members.length} {t('person')}
+          </Text>
         </View>
       </View>
     </Card>
@@ -131,7 +136,7 @@ export default function ListGroup() {
     <SafeAreaView style={styles.wrapper}>
       <View style={styles.body}>
         <View style={styles.container}>
-          <Text>{t('group.title')}</Text>
+          <Text>{t('group.list-title')}</Text>
           <MaterialIcons name="add-circle-outline" size={24} onPress={() => setVisible(true)} />
         </View>
         <List style={styles.list} data={groups} renderItem={renderItem} />

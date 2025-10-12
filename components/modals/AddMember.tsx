@@ -1,3 +1,4 @@
+import { useToast } from '@/contexts/ToastContext';
 import { useServiceLoader } from '@/hooks/UseServiceLoader';
 import { groupMemberServices, IGroupMember } from '@/services/GroupMemberServices';
 import { IProfile, userServices } from '@/services/UserServices';
@@ -16,20 +17,24 @@ type IProps = {
 const ModalAddMember = ({ groupId, visible, setVisible, onSuccess, currentMembers }: IProps) => {
   const [users, setUsers] = useState<IProfile[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
+  const { showToast } = useToast();
 
   const { call: createGroupMember, loading } = useServiceLoader(groupMemberServices.add);
   const { call: getAll } = useServiceLoader(userServices.getAll);
 
-  const onCreateGroupMember = async (user_id: string) => {
+  const onCreateGroupMember = async () => {
     try {
-      await createGroupMember({
+      const groupMembersData = selected.map((userId) => ({
         group_id: groupId,
-        user_id: user_id,
+        user_id: userId,
         role: 'member',
-      });
+      }));
+      if (groupMembersData) {
+        await createGroupMember(groupMembersData);
+      }
       onSuccess();
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      if (error?.message) showToast(error.message, { type: 'error' });
     }
   };
 
@@ -40,7 +45,6 @@ const ModalAddMember = ({ groupId, visible, setVisible, onSuccess, currentMember
         style={{
           marginBottom: 16,
         }}
-        // onPress={() => onCreateGroupMember(user.id)}
         onPress={() => {
           const hasSelected = selected.includes(user.id);
           if (hasSelected) {
@@ -48,7 +52,6 @@ const ModalAddMember = ({ groupId, visible, setVisible, onSuccess, currentMember
           } else {
             setSelected([...selected, user.id]);
           }
-          // onCreateGroupMember(user.id)
         }}
       >
         <View style={styles.rowContent}>
@@ -59,7 +62,16 @@ const ModalAddMember = ({ groupId, visible, setVisible, onSuccess, currentMember
               <Text category="c1">{user.email}</Text>
             </View>
           </View>
-          <CheckBox checked={selected.includes(user.id)} />
+          <CheckBox
+            onChange={(checked) => {
+              if (checked) {
+                setSelected([...selected, user.id]);
+              } else {
+                setSelected([...selected].filter((id) => id !== user.id));
+              }
+            }}
+            checked={selected.includes(user.id)}
+          />
         </View>
       </Card>
     );
@@ -74,8 +86,8 @@ const ModalAddMember = ({ groupId, visible, setVisible, onSuccess, currentMember
       );
 
       setUsers(userNotInGroup);
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      if (error?.message) showToast(error.message, { type: 'error' });
     }
   };
 
@@ -124,7 +136,7 @@ const ModalAddMember = ({ groupId, visible, setVisible, onSuccess, currentMember
           <Button
             onPress={() => {
               if (!loading) {
-                setVisible(false);
+                onCreateGroupMember();
               }
             }}
           >

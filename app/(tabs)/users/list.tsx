@@ -1,5 +1,6 @@
 import ModalAddUser from '@/components/modals/AddUser';
 import StringAvatar from '@/components/ui/StringAvatar';
+import { useToast } from '@/contexts/ToastContext';
 import { useServiceLoader } from '@/hooks/UseServiceLoader';
 import { IProfile, userServices } from '@/services/UserServices';
 import { Button, Card, Divider, List, Text } from '@ui-kitten/components';
@@ -10,6 +11,7 @@ import { StyleSheet, View } from 'react-native';
 const ListUser = () => {
   const [users, setUsers] = useState<IProfile[]>([]);
   const [visible, setVisible] = useState(false);
+  const { showToast } = useToast();
 
   const { call: getAll, loading } = useServiceLoader(userServices.getAll);
 
@@ -33,8 +35,8 @@ const ListUser = () => {
     try {
       const data = await getAll();
       setUsers(data);
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      if (error?.message) showToast(error.message, { type: 'error' });
     }
   };
 
@@ -48,7 +50,7 @@ const ListUser = () => {
         <List style={styles.list} data={users} renderItem={renderItem} />
       </Card>
       <View>
-        <Button onPress={() => setVisible(true)}>{t('button.add')}</Button>
+        <Button onPress={() => setVisible(true)}>{t('button.create')}</Button>
       </View>
       <ModalAddUser visible={visible} setVisible={setVisible} onSuccess={onGetAll} />
     </View>

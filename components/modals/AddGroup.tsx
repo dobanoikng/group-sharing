@@ -1,4 +1,5 @@
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/contexts/ToastContext';
 import { useServiceLoader } from '@/hooks/UseServiceLoader';
 import { groupMemberServices } from '@/services/GroupMemberServices';
 import { groupService } from '@/services/GroupServices';
@@ -28,10 +29,12 @@ type IProps = {
 const ModalAddGroup = ({ visible, setVisible }: IProps) => {
   const router = useRouter();
   const { session } = useAuth();
+  const { showToast } = useToast();
   const { loading: creatingGroup, call: createGroup } = useServiceLoader(groupService.add);
   const { loading: creatingGroupMember, call: createGroupMember } = useServiceLoader(
     groupMemberServices.add,
   );
+
   const { control, handleSubmit } = useForm<GroupFormValues>({
     resolver: zodResolver(groupSchema),
     defaultValues: {
@@ -39,6 +42,7 @@ const ModalAddGroup = ({ visible, setVisible }: IProps) => {
       description: '',
     },
   });
+
   const onSubmit = async ({ name, description }: GroupFormValues) => {
     try {
       const group = await createGroup({
@@ -48,18 +52,21 @@ const ModalAddGroup = ({ visible, setVisible }: IProps) => {
       });
 
       if (group.id) {
-        await createGroupMember({
-          group_id: group.id,
-          user_id: session!.user.id,
-          role: 'owner',
-        });
+        await createGroupMember([
+          {
+            group_id: group.id,
+            user_id: session!.user.id,
+            role: 'owner',
+          },
+        ]);
       }
       setVisible(false);
       router.navigate(`/(tabs)/group/${group.id}`);
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      if (error?.message) showToast(error.message, { type: 'error' });
     }
   };
+
   return (
     <Modal visible={visible} backdropStyle={styles.backdrop} animationType="slide">
       <Card disabled={true} style={styles.card}>
@@ -67,10 +74,14 @@ const ModalAddGroup = ({ visible, setVisible }: IProps) => {
           <Text style={styles.title}>{t('group.modal-title')}</Text>
         </View>
         <View style={styles.input}>
-          <ControllerInput control={control} name="name" placeholder="Name" />
+          <ControllerInput control={control} name="name" placeholder={t('group-form.name')} />
         </View>
         <View style={styles.input}>
-          <ControllerInput control={control} name="description" placeholder="Description" />
+          <ControllerInput
+            control={control}
+            name="description"
+            placeholder={t('group-form.description')}
+          />
         </View>
 
         <Button disabled={creatingGroup || creatingGroupMember} onPress={handleSubmit(onSubmit)}>

@@ -37,15 +37,18 @@ const StringAvatar = ({ text, size = 'small', shape = 'round', style }: IProps) 
         style,
       ]}
     >
-      <Text category="c1" style={[
-        styles.stringAvatarText,
-        {
-          fontSize: avatarSize * 0.5, // tuỳ chỉnh cỡ chữ
-          lineHeight: avatarSize * 0.5, // giữ cho không bị lệch dọc
-          textAlign: 'center',
-          textAlignVertical: 'center', // chỉ hoạt động tốt trên Android
-        },
-      ]}>
+      <Text
+        category="c1"
+        style={[
+          styles.stringAvatarText,
+          {
+            fontSize: avatarSize * 0.5, // tuỳ chỉnh cỡ chữ
+            lineHeight: avatarSize * 0.5, // giữ cho không bị lệch dọc
+            textAlign: 'center',
+            textAlignVertical: 'center', // chỉ hoạt động tốt trên Android
+          },
+        ]}
+      >
         {text.charAt(0).toUpperCase()} {/* Display first letter */}
       </Text>
     </View>

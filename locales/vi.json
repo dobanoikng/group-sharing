@@ -1,12 +1,42 @@
 {
   "tab": {
-    "group": "nhóm",
-    "user": "người dùng"
+    "group": "Nhóm",
+    "user": "Người dùng"
   },
   "button": {
-    "create": "Tạo"
+    "create": "Tạo mới"
   },
   "group": {
-    "modal-title": "Thêm nhóm mới"
-  }
+    "modal-title": "Thêm nhóm mới",
+    "list-title": "Danh sách nhóm",
+    "detail-title": "Chi tiết nhóm",
+    "create-expense": "Tạo mới khoản chi"
+  },
+  "group-form": {
+    "name": "Tên nhóm",
+    "description": "Mô tả"
+  },
+  "user-form": {
+    "name": "Tên người dùng",
+    "email": "Email người dùng",
+    "password": "Mật khẩu",
+    "title": "Tạo mới người dùng"
+  },
+  "expense-form": {
+    "title": "Tên khoản chi",
+    "amount": "Số tiền",
+    "payer": "Người trả tiền"
+  },
+  "split-members": "Số tiền từng thành viên",
+  "expenses": "Khoản chi",
+  "member": "Thành viên",
+  "person": "Người",
+  "summary": "Thông tin chung",
+  "paid-by": "Người trả",
+  "add-expense": "Thêm khoản chi",
+  "owner": "Chủ nhóm",
+  "delete": "Xóa",
+  "add-member": "Thêm thành viên",
+  "total-amount": "Tổng",
+  "split-evenly": "Chia đều"
 }

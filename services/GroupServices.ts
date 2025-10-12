@@ -3,7 +3,7 @@ import { supabase } from '@/libs/supabase'
 const TABLE_NAME = 'groups'
 
 export interface Group {
-  id: number
+  id: string
   name: string
   description?: string
   created_by: string
@@ -25,7 +25,7 @@ export const groupService = {
   async getAll() {
     const { data, error } = await supabase
       .from(TABLE_NAME)
-      .select(`*, group_members(*, profiles(*))`)
+      .select(`*, expenses(*), group_members(*, profiles(*))`)
       .order('created_at', { ascending: true })
     if (error) throw error
     return data
@@ -53,7 +53,7 @@ export const groupService = {
   },
   async detail(id: string) {
     const { data, error } = await supabase.from(TABLE_NAME)
-      .select('*')
+      .select(`*, expenses(*, expense_splits(*))`)
       .eq('id', id)
     if (error) throw error
     return data[0]

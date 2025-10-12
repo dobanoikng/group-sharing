@@ -11,9 +11,9 @@ export type IGroupMember = {
 }
 
 export const groupMemberServices = {
-  async add(groupMember: Omit<IGroupMember, 'id' | 'profiles'>) {
+  async add(groupMembers: Omit<IGroupMember, 'id' | 'profiles'>[]) {
     const { data, error } = await supabase.from(TABLE_NAME)
-      .insert([groupMember])
+      .insert(groupMembers)
       .select()
     if (error) throw error
     return data[0]

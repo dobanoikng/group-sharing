@@ -1,5 +1,6 @@
 import ControllerInput from '@/components/form/ControllerInput';
 import { ControllerSelect } from '@/components/form/ControllerSelect';
+import { useToast } from '@/contexts/ToastContext';
 import { useServiceLoader } from '@/hooks/UseServiceLoader';
 import { expenseServices } from '@/services/ExpenseServices';
 import { expenseSplitServices } from '@/services/ExpenseSplitServices';
@@ -26,6 +27,7 @@ const ExpenseSchema = z
     expense_splits: z
       .array(
         z.object({
+          id: z.string(),
           user_id: z.string(),
           amount: z.string().min(0, { message: 'Amount must be >= 0' }),
         }),
@@ -45,17 +47,19 @@ const ExpenseSchema = z
 
 type ExpenseFormData = z.infer<typeof ExpenseSchema>;
 
-const CreateExpense = () => {
-  const { id } = useLocalSearchParams();
+const EditExpense = () => {
+  const { id, expenseId } = useLocalSearchParams();
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
+  const { showToast } = useToast();
   const [memberOptions, setMemberOptions] = useState<Option[]>([]);
 
   const { call: getAll, loading } = useServiceLoader(groupMemberServices.getAllFromGroup);
-  const { call: addExpense, loading: adding } = useServiceLoader(expenseServices.add);
-  const { call: addExpenseSplit, loading: addingSplit } = useServiceLoader(
-    expenseSplitServices.add,
+  const { call: updateExpense, loading: adding } = useServiceLoader(expenseServices.update);
+  const { call: detailExpense, loading: detailing } = useServiceLoader(expenseServices.detail);
+  const { call: updateExpenseSplit, loading: addingSplit } = useServiceLoader(
+    expenseSplitServices.update,
   );
+  const { call: addExpenseSplit } = useServiceLoader(expenseSplitServices.add);
 
   const {
     control,
@@ -72,20 +76,33 @@ const CreateExpense = () => {
 
   const onGetListGroupMember = async () => {
     try {
-      const groupMembers = await getAll(id as string);
+      const [groupMembers, expenseDetail] = await Promise.all([
+        getAll(id as string),
+        detailExpense(expenseId as string),
+      ]);
+
       setMemberOptions(
         groupMembers.map((item) => ({ label: item.profiles.full_name, value: item.profiles.id })),
       );
+      setValue('amount', String(expenseDetail.amount));
+      setValue('title', expenseDetail.title);
+      setValue('paid_by', expenseDetail.paid_by);
       setValue(
         'expense_splits',
-        groupMembers.map((item) => ({
-          user_id: item.profiles.id,
-          amount: '0',
-        })),
+        groupMembers.map((item) => {
+          const exSpit = expenseDetail.expense_splits.find(
+            (_item: any) => _item.user_id === item.profiles.id,
+          );
+          return {
+            id: exSpit?.id ?? '-',
+            user_id: item.profiles.id,
+            amount: String(exSpit?.amount ?? 0),
+          };
+        }),
       );
     } catch (error: any) {
       if (error?.message) {
-        setError(error?.message);
+        showToast(error?.message, { type: 'error' });
       }
     }
   };
@@ -99,6 +116,7 @@ const CreateExpense = () => {
     setValue(
       'expense_splits',
       memberOptions.map((m) => ({
+        id: expenseSplits.find((ex) => ex.user_id === m.value)!.id,
         user_id: m.value,
         amount: `${Math.round(perMember)}`,
       })),
@@ -126,22 +144,28 @@ const CreateExpense = () => {
 
   const onSubmit = async (data: ExpenseFormData) => {
     try {
-      const expense = await addExpense({
+      console.log(data);
+      const expense = await updateExpense(expenseId as string, {
         amount: Number(data.amount),
         currency: 'VND',
         group_id: id as string,
         title: data.title,
         paid_by: data.paid_by,
       });
-      const expenseSplits = data.expense_splits.map((i) => ({
-        user_id: i.user_id,
-        amount: Number(i.amount),
-        expense_id: expense.id,
-      }));
-      await addExpenseSplit(expenseSplits);
-      router.navigate(`/(tabs)/group/${id}`);
+      const expenseSplits = data.expense_splits.map((i) => {
+        const data = {
+          user_id: i.user_id,
+          amount: Number(i.amount),
+          expense_id: expense.id,
+        };
+        if (i.id === '-') return addExpenseSplit([data]);
+        return updateExpenseSplit(i.id, data);
+      });
+
+      await Promise.all(expenseSplits);
+      router.back();
     } catch (error: any) {
-      setError(error?.message);
+      if (error?.message) showToast(error?.message);
     }
   };
 
@@ -206,23 +230,18 @@ const CreateExpense = () => {
             </Card>
           );
         })}
-        {error && (
-          <Text style={styles.errorText} status="danger">
-            {error}
-          </Text>
-        )}
         {errors.expense_splits && (
           <Text status="danger">{errors.expense_splits.root?.message}</Text>
         )}
         <Button onPress={handleSubmit(onSubmit)} disabled={loading}>
-          {loading || adding || addingSplit ? 'Loading...' : t('button.create')}
+          {loading || adding || addingSplit ? 'Loading...' : t('button.edit')}
         </Button>
       </View>
     </Layout>
   );
 };
 
-export default CreateExpense;
+export default EditExpense;
 
 const styles = StyleSheet.create({
   container: {

@@ -27,11 +27,27 @@ export const expenseServices = {
     if (error) throw error
     return data
   },
+  async detail(id: string) {
+    const { data, error } = await supabase.from(TABLE_NAME)
+      .select(`*, expense_splits(*)`)
+      .eq('id', id)
+    if (error) throw error
+    return data[0]
+  },
   async add(expense: IExpenseCreate) {
     const { data, error } = await supabase
       .from(TABLE_NAME)
       .insert([expense])
       .select('*')
+    if (error) throw error
+    return data[0]
+  },
+  async update(id: string, expense: Partial<IExpenseCreate>) {
+    const { data, error } = await supabase
+      .from(TABLE_NAME)
+      .update(expense)
+      .eq('id', id)
+      .select()
     if (error) throw error
     return data[0]
   },

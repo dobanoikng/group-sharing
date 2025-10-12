@@ -18,6 +18,17 @@ export const expenseSplitServices = {
     if (error) throw error
     return data
   },
+
+  async update(id: string, updates: Partial<IExpenseSplit>) {
+    const { data, error } = await supabase
+      .from(TABLE_NAME)
+      .update(updates)
+      .eq('id', id)
+      .select()
+    if (error) throw error
+    return data[0]
+  },
+
   async getAllOfUser(userId: string) {
     const { data, error } = await supabase
       .from(TABLE_NAME)

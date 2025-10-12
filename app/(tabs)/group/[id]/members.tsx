@@ -23,8 +23,8 @@ const Members = ({ groupId }: { groupId: string }) => {
     try {
       const groupMembers = await getAll(groupId);
       setGroupMembers(groupMembers);
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      if (error?.message) showToast(error.message);
     }
     setVisible(false);
   };
@@ -33,13 +33,13 @@ const Members = ({ groupId }: { groupId: string }) => {
     try {
       const data = await getExpenseOfUser(userId);
       if (data.find((item) => item?.expenses?.group_id === groupId)) {
-        showToast('User in expense!', 3000);
+        showToast('User in expense!');
       } else {
         await remove(groupMemberId);
         onGetListGroupMember();
       }
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      if (error?.message) showToast(error.message, { type: 'error' });
     }
   };
 
@@ -69,18 +69,18 @@ const Members = ({ groupId }: { groupId: string }) => {
             <View>
               <Text category="label">{item.profiles.full_name}</Text>
               <Text category="c2" appearance="hint">
-                {item.role}
+                {t(item.role)}
               </Text>
             </View>
           </View>
           {item.role !== 'owner' && (
             <Button
-              size="small"
+              size="tiny"
               status="danger"
               disabled={removing || loading || getting}
               onPress={() => onDeleteGroupMember(item.id, item.profiles.id)}
             >
-              Delete
+              {t('delete')}
             </Button>
           )}
         </View>
