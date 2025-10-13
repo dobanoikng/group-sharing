@@ -6,6 +6,18 @@
   "button": {
     "create": "Tạo mới"
   },
+  "login-form": {
+    "title": "Mừng bạn trở lại",
+    "hint": "Đăng nhập để tiếp tục",
+    "email": "Email",
+    "password": "Mật khẩu",
+    "password-placeholder": "Vùi lòng nhập mật khẩu",
+    "button": "Đăng nhập",
+    "continue-with": "hoặc tiếp tực với",
+    "signup": "Đăng Ký",
+    "dont-have-acc": "Chưa có toàn khoản?"
+  },
+
   "group": {
     "modal-title": "Thêm nhóm mới",
     "list-title": "Danh sách nhóm",

@@ -9,6 +9,8 @@ interface ControllerInputProps<T extends FieldValues> {
   placeholder?: string;
   secureTextEntry?: boolean;
   textInputProps?: TextInputProps;
+  required?: boolean;
+  label?: string;
 }
 
 export default function ControllerInput<T extends FieldValues>({
@@ -17,35 +19,48 @@ export default function ControllerInput<T extends FieldValues>({
   placeholder,
   secureTextEntry,
   textInputProps,
+  required,
+  label,
 }: ControllerInputProps<T>) {
   return (
-    <Controller
-      control={control}
-      name={name}
-      render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
-        <View>
-          <Input
-            placeholder={placeholder}
-            onBlur={onBlur}
-            onChangeText={onChange}
-            value={value}
-            secureTextEntry={secureTextEntry}
-            status={error ? 'danger' : 'info'}
-            autoCapitalize="none"
-            {...textInputProps}
-          />
-
-          {error && (
-            <Text style={styles.text} status="danger">
-              {error.message}
+    <View>
+      {label && (
+        <Text style={styles.label} category="label">
+          {label}{' '}
+          {required && (
+            <Text category="p1" appearance="hint" status="danger">
+              *
             </Text>
           )}
-        </View>
+        </Text>
       )}
-    />
+      <Controller
+        control={control}
+        name={name}
+        render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+          <View>
+            <Input
+              placeholder={placeholder}
+              onBlur={onBlur}
+              onChangeText={onChange}
+              value={value}
+              secureTextEntry={secureTextEntry}
+              status={error ? 'danger' : 'info'}
+              autoCapitalize="none"
+              {...textInputProps}
+            />
+
+            {error && <Text status="danger">{error.message}</Text>}
+          </View>
+        )}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  text: {},
+  label: {
+    fontSize: 18,
+    fontWeight: '800',
+  },
 });
