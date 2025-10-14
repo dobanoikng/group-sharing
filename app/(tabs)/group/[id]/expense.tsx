@@ -1,7 +1,9 @@
+import FloatingButton from '@/components/ui/FloatingButton';
 import { useToast } from '@/contexts/ToastContext';
 import { useServiceLoader } from '@/hooks/UseServiceLoader';
 import { expenseServices, IExpense } from '@/services/ExpenseServices';
-import { Button, Card, List, Text } from '@ui-kitten/components';
+import { MaterialIcons } from '@expo/vector-icons';
+import { Card, List, Text } from '@ui-kitten/components';
 import { useRouter } from 'expo-router';
 import { t } from 'i18next';
 import React, { useEffect, useState } from 'react';
@@ -78,12 +80,14 @@ const Expense = ({ groupId }: IProps) => {
   return (
     <View style={styles.container}>
       <List style={{ backgroundColor: 'transparent' }} data={expenses} renderItem={renderItem} />
-      <Button
-        onPress={() => router.navigate(`/(tabs)/group/${groupId}/create-expense`)}
-        style={styles.fixedButton}
-      >
-        {t('add-expense')}
-      </Button>
+      <FloatingButton onPress={() => {}}>
+        <MaterialIcons
+          name="add"
+          size={24}
+          color="#fff"
+          onPress={() => router.navigate(`/(tabs)/group/${groupId}/create-expense`)}
+        />
+      </FloatingButton>
     </View>
   );
 };

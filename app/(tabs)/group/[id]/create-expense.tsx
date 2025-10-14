@@ -1,11 +1,11 @@
 import ControllerInput from '@/components/form/ControllerInput';
-import { ControllerSelect } from '@/components/form/ControllerSelect';
+import StringAvatar from '@/components/ui/StringAvatar';
 import { useServiceLoader } from '@/hooks/UseServiceLoader';
 import { expenseServices } from '@/services/ExpenseServices';
 import { expenseSplitServices } from '@/services/ExpenseSplitServices';
 import { groupMemberServices } from '@/services/GroupMemberServices';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button, Card, Divider, Layout, Text } from '@ui-kitten/components';
+import { Button, Card, Layout, List, Text, useTheme } from '@ui-kitten/components';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { t } from 'i18next';
 import { useEffect, useState } from 'react';
@@ -48,6 +48,7 @@ type ExpenseFormData = z.infer<typeof ExpenseSchema>;
 const CreateExpense = () => {
   const { id } = useLocalSearchParams();
   const router = useRouter();
+  const theme = useTheme();
   const [error, setError] = useState<string | null>(null);
   const [memberOptions, setMemberOptions] = useState<Option[]>([]);
 
@@ -150,74 +151,86 @@ const CreateExpense = () => {
   }, [id]);
 
   return (
-    <Layout style={styles.container}>
-      <View style={styles.form}>
+    <Layout style={[styles.container, { backgroundColor: theme['background-basic-color-2'] }]}>
+      <View style={[styles.form, { backgroundColor: theme['background-basic-color-2'] }]}>
         <ControllerInput<ExpenseFormData>
           control={control}
           name="title"
           placeholder={t('expense-form.title')}
+          label={t('expense-form.title')}
         />
         <ControllerInput<ExpenseFormData>
           control={control}
           name="amount"
+          label={t('expense-form.amount')}
           placeholder={t('expense-form.amount')}
           textInputProps={{
             keyboardType: 'numeric',
           }}
         />
-        <ControllerSelect
+        {/* <ControllerSelect
           control={control}
           name="paid_by"
           placeholder={t('expense-form.payer')}
           options={memberOptions}
-        />
-        <Divider />
-        <View style={styles.flexRow}>
-          <Text category="h6">{t('split-members')}</Text>
-          <Button
-            size="small"
-            status="primary"
-            appearance="outline"
-            disabled={!totalAmount || Number(totalAmount) <= 0}
-            onPress={splitEqually}
-          >
-            {t('split-evenly')}
-          </Button>
-        </View>
-
-        {memberOptions.map((mo, index) => {
-          return (
-            <Card key={mo.value}>
-              <View style={styles.flexRow}>
-                <Text category="label">{mo.label}</Text>
-                <ControllerInput<ExpenseFormData>
-                  control={control}
-                  name={`expense_splits.${index}.amount`}
-                  placeholder={t('expense-form.amount')}
-                  textInputProps={{
-                    keyboardType: 'numeric',
-                    onChangeText: (text) => {
-                      const val = Number(text) || 0;
-                      handleSplitChange(index, val);
-                    },
-                  }}
-                />
+        /> */}
+      </View>
+      <Card>
+        <List
+          data={memberOptions}
+          renderItem={({ item }) => (
+            <View>
+              <View>
+                <StringAvatar text={item.label} />
+                <Text>{item.label}</Text>
               </View>
-            </Card>
-          );
-        })}
-        {error && (
-          <Text style={styles.errorText} status="danger">
-            {error}
-          </Text>
-        )}
-        {errors.expense_splits && (
-          <Text status="danger">{errors.expense_splits.root?.message}</Text>
-        )}
-        <Button onPress={handleSubmit(onSubmit)} disabled={loading}>
-          {loading || adding || addingSplit ? 'Loading...' : t('button.create')}
+            </View>
+          )}
+        />
+      </Card>
+      <View style={styles.flexRow}>
+        <Text category="h6">{t('split-members')}</Text>
+        <Button
+          size="small"
+          status="primary"
+          appearance="outline"
+          disabled={!totalAmount || Number(totalAmount) <= 0}
+          onPress={splitEqually}
+        >
+          {t('split-evenly')}
         </Button>
       </View>
+
+      {memberOptions.map((mo, index) => {
+        return (
+          <Card key={mo.value}>
+            <View style={styles.flexRow}>
+              <Text category="label">{mo.label}</Text>
+              <ControllerInput<ExpenseFormData>
+                control={control}
+                name={`expense_splits.${index}.amount`}
+                placeholder={t('expense-form.amount')}
+                textInputProps={{
+                  keyboardType: 'numeric',
+                  onChangeText: (text) => {
+                    const val = Number(text) || 0;
+                    handleSplitChange(index, val);
+                  },
+                }}
+              />
+            </View>
+          </Card>
+        );
+      })}
+      {error && (
+        <Text style={styles.errorText} status="danger">
+          {error}
+        </Text>
+      )}
+      {errors.expense_splits && <Text status="danger">{errors.expense_splits.root?.message}</Text>}
+      <Button onPress={handleSubmit(onSubmit)} disabled={loading}>
+        {loading || adding || addingSplit ? 'Loading...' : t('button.create')}
+      </Button>
     </Layout>
   );
 };

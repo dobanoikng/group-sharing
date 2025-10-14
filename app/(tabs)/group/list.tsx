@@ -1,16 +1,16 @@
 import ModalAddGroup from '@/components/modals/AddGroup';
+import FloatingButton from '@/components/ui/FloatingButton';
 import StringAvatar from '@/components/ui/StringAvatar';
 import { useToast } from '@/contexts/ToastContext';
 import { useServiceLoader } from '@/hooks/UseServiceLoader';
 import { Group, groupService } from '@/services/GroupServices';
 import { formatDate, formatMoney } from '@/utils';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Card, List, Spinner, Text } from '@ui-kitten/components';
+import { Card, List, Spinner, Text, useTheme } from '@ui-kitten/components';
 import { useRouter } from 'expo-router';
 import { t } from 'i18next';
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 type GroupMember = {
   id: string;
@@ -27,8 +27,10 @@ type GroupList = Group & {
 
 export default function ListGroup() {
   const router = useRouter();
+  const theme = useTheme();
   const [visible, setVisible] = useState(false);
   const [groups, setGroups] = useState<GroupList[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
   const { showToast } = useToast();
   const { loading: gettingAll, call: getAllGroup } = useServiceLoader(groupService.getAll);
 
@@ -36,41 +38,45 @@ export default function ListGroup() {
     try {
       const data = await getAllGroup();
       setGroups(data);
+      setRefreshing(false);
     } catch (error: any) {
       if (error?.message) showToast(error.message, { type: 'error' });
     }
   };
-  const renderItem = ({ item }: { item: GroupList }) => (
+
+  const renderItem = ({ index, item }: { index: number; item: GroupList }) => (
     <Card
-      header={(headerProps) => (
-        <View {...headerProps} style={[headerProps?.style, styles.card_header]}>
-          <View>
-            <Text category="h6">{item.name}</Text>
-            <Text category="c2" appearance="hint">
-              {formatDate(item.created_at)}
-            </Text>
-          </View>
-          <Text
-            category="label"
-            style={{
-              fontSize: 22,
-            }}
-          >
-            {formatMoney(item.expenses.reduce((acc, curr) => acc + curr.amount, 0))}
-          </Text>
-        </View>
-      )}
       style={{
-        marginBottom: 12,
-        borderRadius: 24,
+        marginBottom: index === groups.length - 1 ? 70 : 6,
+        borderRadius: 8,
+
+        borderColor: theme['color-info-600'],
       }}
       onPress={() => router.navigate(`/(tabs)/group/${item.id}`)}
     >
+      <View>
+        <View style={styles.rowCenter}>
+          <Text category="h6">{item.name}</Text>
+          <MaterialIcons name="arrow-forward" size={24} />
+        </View>
+        <View>
+          <View style={{ flexDirection: 'row', gap: 5 }}>
+            <MaterialIcons name="people-alt" size={20} />
+            <Text>
+              {item.group_members.length} {t('member')}
+            </Text>
+          </View>
+          <Text category="c2" appearance="hint">
+            Ngày tạo: {formatDate(item.created_at)}
+          </Text>
+        </View>
+      </View>
       <View
         style={{
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'space-between',
+          paddingTop: 20,
         }}
       >
         <View
@@ -79,31 +85,35 @@ export default function ListGroup() {
             gap: 5,
           }}
         >
-          {item.group_members.slice(0, 3).map((grMember) => (
-            <View key={grMember.user_id}>
-              <StringAvatar text={grMember.profiles.full_name} />
-            </View>
-          ))}
-          {item.group_members.length > 3 && (
-            <View
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: 16,
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: '#eeeaeaff',
-              }}
-            >
-              <Text
+          <View style={styles.memberList}>
+            {item.group_members.slice(0, 3).map((grMember, index) => (
+              <View key={grMember.user_id} style={{ left: index * -10, zIndex: index }}>
+                <StringAvatar text={grMember.profiles.full_name} />
+              </View>
+            ))}
+            {item.group_members.length > 3 && (
+              <View
                 style={{
-                  color: 'green',
+                  width: 32,
+                  height: 32,
+                  borderRadius: 16,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  backgroundColor: '#eeeaeaff',
+                  left: -30,
+                  zIndex: 4,
                 }}
               >
-                +{item.group_members.length - 3}
-              </Text>
-            </View>
-          )}
+                <Text
+                  style={{
+                    color: 'green',
+                  }}
+                >
+                  +{item.group_members.length - 3}
+                </Text>
+              </View>
+            )}
+          </View>
         </View>
         <View
           style={{
@@ -111,16 +121,18 @@ export default function ListGroup() {
             alignItems: 'center',
           }}
         >
-          <Text category="c1" appearance="hint">
-            {t('member')}:{' '}
-          </Text>
-          <Text category="p1">
-            {item.group_members.length} {t('person')}
+          <Text appearance="hint">
+            {formatMoney(item.expenses.reduce((acc, curr) => acc + curr.amount, 0))}
           </Text>
         </View>
       </View>
     </Card>
   );
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    onGetListGroup();
+  };
 
   useEffect(() => {
     onGetListGroup();
@@ -132,32 +144,28 @@ export default function ListGroup() {
         <Spinner size="giant" />
       </View>
     );
+
   return (
-    <SafeAreaView style={styles.wrapper}>
-      <View style={styles.body}>
-        <View style={styles.container}>
-          <Text>{t('group.list-title')}</Text>
-          <MaterialIcons name="add-circle-outline" size={24} onPress={() => setVisible(true)} />
-        </View>
-        <List style={styles.list} data={groups} renderItem={renderItem} />
-        <ModalAddGroup visible={visible} setVisible={setVisible} />
-      </View>
-    </SafeAreaView>
+    <View style={styles.body}>
+      <List
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+        style={styles.list}
+        data={groups}
+        renderItem={renderItem}
+      />
+      <FloatingButton onPress={() => {}}>
+        <MaterialIcons name="add" size={24} color="#fff" onPress={() => setVisible(true)} />
+      </FloatingButton>
+      <ModalAddGroup visible={visible} setVisible={setVisible} />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    flex: 1,
-  },
   body: {
     padding: 12,
-  },
-  container: {
-    paddingVertical: 6,
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flexDirection: 'row',
+    position: 'relative',
   },
   card: {
     minWidth: '80%',
@@ -170,10 +178,15 @@ const styles = StyleSheet.create({
   },
   list: {
     backgroundColor: 'transparent',
+    paddingHorizontal: 16,
+    gap: 16,
   },
-  card_header: {
-    justifyContent: 'space-between',
+  rowCenter: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  memberList: {
     flexDirection: 'row',
   },
 });

@@ -45,7 +45,7 @@ export default function ControllerInput<T extends FieldValues>({
               onChangeText={onChange}
               value={value}
               secureTextEntry={secureTextEntry}
-              status={error ? 'danger' : 'info'}
+              status={error ? 'danger' : 'success'}
               autoCapitalize="none"
               {...textInputProps}
             />

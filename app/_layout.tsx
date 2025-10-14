@@ -9,6 +9,8 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { ToastProvider } from '@/contexts/ToastContext';
 import { KeyboardAvoidingView, Platform } from 'react-native';
 
+import customTheme from '@/themes/custom-theme.json';
+
 SplashScreen.preventAutoHideAsync();
 
 const InitialLayout = () => {
@@ -42,7 +44,7 @@ const InitialLayout = () => {
 
 export default function RootLayout() {
   return (
-    <ApplicationProvider {...eva} theme={eva.light}>
+    <ApplicationProvider {...eva} theme={{ ...eva.dark, ...customTheme }}>
       <AuthProvider>
         <ToastProvider>
           <KeyboardAvoidingView

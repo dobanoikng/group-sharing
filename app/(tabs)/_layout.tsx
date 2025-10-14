@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 const Layout = () => {
   const { t } = useTranslation();
   return (
-    <Tabs>
+    <Tabs safeAreaInsets={{ bottom: 0 }}>
       <Tabs.Screen
         name="group"
         options={{

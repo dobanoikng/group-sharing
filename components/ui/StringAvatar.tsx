@@ -1,4 +1,4 @@
-import { Text } from '@ui-kitten/components';
+import { Text, useTheme } from '@ui-kitten/components';
 import React from 'react';
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 
@@ -17,7 +17,7 @@ type IProps = {
   style?: StyleProp<ViewStyle>;
 };
 const StringAvatar = ({ text, size = 'small', shape = 'round', style }: IProps) => {
-  // Determine size based on UI Kitten's Avatar sizes
+  const theme = useTheme();
 
   const avatarSize = avatarSizes[size] || avatarSizes.medium;
 
@@ -33,6 +33,7 @@ const StringAvatar = ({ text, size = 'small', shape = 'round', style }: IProps) 
           width: avatarSize,
           height: avatarSize,
           borderRadius: borderRadius,
+          backgroundColor: theme['color-primary-500'],
         },
         style,
       ]}
